@@ -1,79 +1,88 @@
-# Guardian Edge: Instant Hazard Alert for Two-Wheelers via NICLA Vision
+# 🛡️ Guardian Edge: Instant Hazard Alert for Two-Wheelers via NICLA Vision
 
-Guardian Edge is a real-time hazard detection system designed to enhance rider safety for two-wheelers. By leveraging the **Arduino Nicla Vision** and machine learning models, this project detects sudden falls and jerks during rides — enabling instant alerts to prevent accidents and ensure timely assistance.
+Guardian Edge is a real-time fall and jerk detection system designed for two-wheeler riders.  
+It uses **dual IMU data** — one from an **Arduino Nicla Vision mounted on the helmet**, and another from a **mobile phone** — to instantly detect hazardous motions like **falls or sudden jerks** during rides.
 
 ---
 
 ## 🚀 Project Overview
 
-Two-wheeler riders face frequent risks of falling or losing balance due to poor roads or sudden movements. **Guardian Edge** captures motion data and analyzes it in real-time to predict hazard events such as **falling** or **jerking**. 
+Every second counts in accidents — and early hazard detection can save lives.  
+Guardian Edge aims to bring **intelligent safety assistance** to bikers by combining on-device sensor data with lightweight ML models for immediate feedback.
 
-The core idea is to process IMU (Inertial Measurement Unit) and camera data locally on **Nicla Vision**, perform on-device inference, and alert the user or connected system when an anomaly (fall/jerk) is detected.
+This project focuses on:
 
----
-
-## 🧩 Key Features
-
-- Real-time detection of falls and jerks.  
-- Machine learning–based classification using **Decision Tree** and **Neural Network models**.  
-- Edge inference support using **Arduino Nicla Vision**.  
-- Lightweight and power-efficient design for two-wheeler integration.  
+- Collecting **IMU data** (accelerometer and gyroscope) from the rider’s helmet and smartphone.
+- Predicting **falls** and **jerks** in real-time.
+- Enabling **instant alerts** or automated responses through the Arduino Nicla Vision.
 
 ---
 
 ## 🧠 Workflow
 
-### 1. Data Collection
-- Collected sensor data from **riding** and **falling scenarios** using the onboard sensors of Nicla Vision.  
-- Captured accelerometer, gyroscope, and camera input during various motion states.  
+1. **Data Collection**
+   - Recorded IMU data from both sources during:
+     - Normal riding sessions
+     - Controlled falling/jerking simulations
+   - Synced data via timestamp alignment for multi-sensor coherence.
 
-### 2. Exploratory Data Analysis (EDA)
-- Visualized motion data trends for normal and abnormal events.  
-- Identified distinct patterns in acceleration and angular velocity during falls.  
-- Filtered noise and normalized sensor readings.  
+2. **Exploratory Data Analysis (EDA)**
+   - Visualized motion patterns for different activities.
+   - Compared helmet and mobile sensor readings to identify distinctive features for hazardous events.
+   - Filtered noise and handled outliers to improve signal reliability.
 
-### 3. Feature Engineering
-- Extracted statistical and temporal features (mean, standard deviation, peaks, energy, etc.).  
-- Computed derived metrics like jerk magnitude and motion vector variance.  
+3. **Feature Engineering**
+   - Derived new metrics like acceleration magnitude, jerk rate, orientation shifts, and angular velocity.
+   - Built a meaningful feature set representing dynamic motion states.
 
-### 4. Model Development
-- Applied classical ML and deep learning models:
-  - **Decision Tree Classifier** for baseline interpretability.  
-  - **Neural Network** for improved generalization and performance.  
-- Trained both models to classify states: *normal riding*, *jerk detected*, *fall detected*.
+4. **Modeling**
+   - Trained and compared **Decision Tree** and **Neural Network** models.
+   - Decision Tree provided interpretability, while the NN improved adaptability to subtle jerks.
 
-### 5. Training and Inference
-- Split dataset into training and test sets.  
-- Optimized hyperparameters and validated performance.  
-- Deployed trained model on Nicla Vision for **real-time hazard inference**.  
+5. **Training & Inference**
+   - Split dataset into training and test sets for performance validation.
+   - Achieved effective detection accuracy for fall and jerk classification.
+   - Deployed trained models for **on-device inference** using Arduino Nicla Vision.
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Category | Tools / Libraries |
-|-----------|-------------------|
-| Hardware | Arduino Nicla Vision |
-| Language | Python, MicroPython |
-| ML Tools | scikit-learn, TensorFlow / Keras |
-| Data Processing | NumPy, Pandas, Matplotlib |
-| Deployment | Arduino IDE, Edge Impulse / TensorFlow Lite |
+| Component | Description |
+|------------|-------------|
+| **Hardware** | Arduino Nicla Vision, Android smartphone |
+| **Sensors** | IMU (Accelerometer + Gyroscope) |
+| **Languages** | Python, MicroPython|
+| **ML Frameworks** | PyTorch / Scikit-learn |
+| **Data Processing** | NumPy, Pandas, Matplotlib |
+| **Deployment** | Arduino IDE, Edge ML tools |
 
 ---
 
 ## 📊 Results
-- Achieved accurate classification between normal and abnormal riding states.  
-- Demonstrated real-time alerting capability during tests.  
-- Compact model fits within on-device resource constraints.  
+
+- Reliable detection of falls and jerks during real-world testing.
+- Dual-sensor approach improved motion context understanding.
+- Lightweight design suitable for **real-time edge deployment**.
 
 ---
 
-## 🔄 Future Improvements
-- Add GPS and connectivity features for automatic emergency alerts.  
-- Integrate camera-based scene awareness for road hazard context.  
-- Extend to detection of other risky ride behaviors (e.g., collisions, skidding).
+## 🧩 Future Enhancements
+
+- Integrate GPS for automatic location-based alerting.
+- Add cloud backup for continuous ride monitoring.
+- Optimize neural model for even lower latency on embedded hardware.
 
 ---
 
-Feel free to reach out for collaboration or technical discussion!
+## 👨‍💻 Author
+
+**Manas Kumar Mishra**
+**Adarsh Dubey**
+**Animesh Kumar**
+**Abhijeet Kumar**
+**Varshan P A**
+---
+
+> *Guardian Edge — because safety should always ride with you.*
 
