@@ -77,11 +77,11 @@ This project focuses on:
 
 ## 👨‍💻 Author
 
-**Manas Kumar Mishra**
-**Adarsh Dubey**
-**Animesh Kumar**
-**Abhijeet Kumar**
-**Varshan P A**
+- **Manas Kumar Mishra** 
+- **Adarsh Dubey** 
+- **Animesh Kumar** 
+- **Abhijeet Kumar** 
+- **Varshan P A** 
 ---
 
 > *Guardian Edge — because safety should always ride with you.*
