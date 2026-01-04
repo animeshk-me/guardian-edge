@@ -54,7 +54,7 @@ The core idea is to process IMU (Inertial Measurement Unit) and camera data loca
 | Category | Tools / Libraries |
 |-----------|-------------------|
 | Hardware | Arduino Nicla Vision |
-| Language | Python, C++ |
+| Language | Python, MicroPython |
 | ML Tools | scikit-learn, TensorFlow / Keras |
 | Data Processing | NumPy, Pandas, Matplotlib |
 | Deployment | Arduino IDE, Edge Impulse / TensorFlow Lite |
