@@ -1,0 +1,180 @@
+# Create sliding window dataframe from df_B
+# Window size: 200 samples per entry
+# Target: < 120 divisions
+
+window_size = 200
+total_samples = len(df_B)
+
+# Calculate step size to get approximately <120 divisions
+target_divisions = 116
+step_size = (total_samples - window_size) // (target_divisions - 1)
+
+print(f"Total samples in df_B: {total_samples}")
+print(f"Window size: {window_size}")
+print(f"Step size: {step_size}")
+
+# Create sliding windows
+windows = []
+for i in range(0, total_samples - window_size + 1, step_size):
+    window = df_B.iloc[i:i+window_size].copy()
+    windows.append(window)
+    
+print(f"Number of windows created: {len(windows)}")
+
+# Create a list to store each window's data
+windowed_data = []
+for idx, window in enumerate(windows):
+    # Create a dictionary with window metadata and flattened sensor data
+    window_dict = {
+        'window_id': idx,
+        'start_idx': idx * step_size,
+        'end_idx': idx * step_size + window_size - 1,
+    }
+    
+    # Add flattened sensor readings
+    for col in ['ax', 'ay', 'az', 'gx', 'gy', 'gz']:
+        for i, val in enumerate(window[col].values):
+            window_dict[f'{col}_{i}'] = val
+    
+    windowed_data.append(window_dict)
+
+# Create the new dataframe
+df_B_windowed = pd.DataFrame(windowed_data)
+
+print(f"\nWindowed dataframe shape: {df_B_windowed.shape}")
+print(f"Columns: window_id, start_idx, end_idx, + {6 * window_size} sensor readings")
+df_B_windowed.head()
+
+
+# Create 3D array: (num_windows, window_size, num_sensors)
+# Shape: (116, 200, 6)
+# Dimensions: [window_id, time_step, sensor_channel]
+
+sensor_columns = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
+num_windows = len(windows)
+num_sensors = len(sensor_columns)
+
+# Initialize 3D array
+data_3d_B = np.zeros((num_windows, window_size, num_sensors))
+
+# Fill the 3D array
+for window_idx, window in enumerate(windows):
+    for sensor_idx, sensor in enumerate(sensor_columns):
+        data_3d_B[window_idx, :, sensor_idx] = window[sensor].values
+
+print(f"3D array shape: {data_3d_B.shape}")
+print(f"Dimensions: (num_windows={num_windows}, window_size={window_size}, num_sensors={num_sensors})")
+print(f"\nArray details:")
+print(f"  - Axis 0 (windows/channels): {data_3d_B.shape[0]} windows")
+print(f"  - Axis 1 (time steps/rows): {data_3d_B.shape[1]} samples per window")
+print(f"  - Axis 2 (sensor columns): {data_3d_B.shape[2]} sensors {sensor_columns}")
+print(f"\nFirst window, first 5 time steps:")
+print(pd.DataFrame(data_3d_B[0, :5, :], columns=sensor_columns))
+
+
+# Calculate difference between consecutive windows using data_3d_B
+# For each window, compute: window[i+1] - window[i]
+# Shape: (115, 200, 6) - one less window since computing differences
+
+# Calculate differences between consecutive windows
+data_3d_diff_B = np.diff(data_3d_B, axis=0)
+
+print(f"Original data_3d_B shape: {data_3d_B.shape}")
+print(f"Difference data_3d_diff_B shape: {data_3d_diff_B.shape}")
+print(f"Shape breakdown:")
+print(f"  - Axis 0 (window differences): {data_3d_diff_B.shape[0]} (115 = 116 - 1)")
+print(f"  - Axis 1 (time steps): {data_3d_diff_B.shape[1]} samples per window")
+print(f"  - Axis 2 (sensors): {data_3d_diff_B.shape[2]} sensors {sensor_columns}")
+
+print(f"\nFirst difference window, first 5 time steps:")
+print(pd.DataFrame(data_3d_diff_B[0, :5, :], columns=sensor_columns))
+
+
+# Calculate statistical features on the difference data
+# For each of the 115 difference windows, compute statistics across the 200 time steps
+
+num_diff_windows = data_3d_diff_B.shape[0]
+
+# Initialize dictionary to store statistics for difference data
+stats_diff_dict = {
+    'diff_window_id': []
+}
+
+# Use the same statistical functions
+stat_functions = {
+    'mean': np.mean,
+    'std': np.std,
+    'min': np.min,
+    'max': np.max,
+    'median': np.median,
+    'q25': lambda x: np.percentile(x, 25),
+    'q75': lambda x: np.percentile(x, 75)
+}
+
+# Initialize columns for each sensor and statistic
+for sensor in sensor_columns:
+    for stat_name in stat_functions.keys():
+        stats_diff_dict[f'{sensor}_{stat_name}'] = []
+
+# Compute statistics for each difference window
+for window_idx in range(num_diff_windows):
+    stats_diff_dict['diff_window_id'].append(window_idx)
+    
+    # For each sensor
+    for sensor_idx, sensor in enumerate(sensor_columns):
+        # Extract the time series for this difference window and sensor
+        time_series = data_3d_diff_B[window_idx, :, sensor_idx]
+        
+        # Compute each statistic
+        for stat_name, stat_func in stat_functions.items():
+            value = stat_func(time_series)
+            stats_diff_dict[f'{sensor}_{stat_name}'].append(value)
+
+# Create DataFrame with difference statistics
+df_stats_diff_B = pd.DataFrame(stats_diff_dict)
+
+print(f"Difference Statistics DataFrame shape: {df_stats_diff_B.shape}")
+print(f"Rows: {df_stats_diff_B.shape[0]} difference windows")
+print(f"Columns: {df_stats_diff_B.shape[1]} features (diff_window_id + {len(sensor_columns)} sensors × {len(stat_functions)} statistics)")
+print(f"\nFirst 5 difference windows statistics:")
+df_stats_diff_B.head()
+
+# Plot statistical features for difference data across all windows
+fig, axes = plt.subplots(3, 2, figsize=(18, 12))
+fig.suptitle('Statistical Features of Difference Data Across 115 Windows', fontsize=16, fontweight='bold')
+
+sensors = ['ax', 'ay', 'az', 'gx', 'gy', 'gz']
+sensor_labels = ['Accelerometer X Diff', 'Accelerometer Y Diff', 'Accelerometer Z Diff', 
+                 'Gyroscope X Diff', 'Gyroscope Y Diff', 'Gyroscope Z Diff']
+
+for idx, (sensor, label) in enumerate(zip(sensors, sensor_labels)):
+    row = idx // 2
+    col = idx % 2
+    ax = axes[row, col]
+    
+    # Plot mean with std as shaded area
+    ax.plot(df_stats_diff_B['diff_window_id'], df_stats_diff_B[f'{sensor}_mean'], 
+            label='Mean', linewidth=2, color='blue')
+    ax.fill_between(df_stats_diff_B['diff_window_id'], 
+                     df_stats_diff_B[f'{sensor}_mean'] - df_stats_diff_B[f'{sensor}_std'],
+                     df_stats_diff_B[f'{sensor}_mean'] + df_stats_diff_B[f'{sensor}_std'],
+                     alpha=0.3, color='blue', label='±1 Std Dev')
+    
+    # Plot min and max
+    ax.plot(df_stats_diff_B['diff_window_id'], df_stats_diff_B[f'{sensor}_min'], 
+            label='Min', linewidth=1, linestyle='--', color='red', alpha=0.7)
+    ax.plot(df_stats_diff_B['diff_window_id'], df_stats_diff_B[f'{sensor}_max'], 
+            label='Max', linewidth=1, linestyle='--', color='green', alpha=0.7)
+    
+    # Plot median
+    ax.plot(df_stats_diff_B['diff_window_id'], df_stats_diff_B[f'{sensor}_median'], 
+            label='Median', linewidth=1.5, linestyle=':', color='orange')
+    
+    ax.set_xlabel('Difference Window ID', fontsize=10)
+    ax.set_ylabel(f'{label} Value', fontsize=10)
+    ax.set_title(f'{label} Statistics', fontsize=12, fontweight='bold')
+    ax.legend(loc='best', fontsize=8)
+    ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
