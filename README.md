@@ -131,6 +131,16 @@ Future iterations can move more of the logic fully onto the embedded device or a
 
 ---
 
+## 🎥 Demo: Live Fall Detection
+
+<video src="Gaurdian_edge_demo.mp4" width="720" height="480" controls autoplay muted loop>
+  Demo of fall detection using Nicla Vision IMU.
+</video>
+
+Watch the system detect a sudden fall during a simulated ride!
+
+---
+
 ## 🔮 Future Work
 
 Planned improvements and extensions:
